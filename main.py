@@ -25,10 +25,28 @@ def rand_record(record_length) -> list[int]:
     return numbers
 
 
+def save_records(records):
+    with open("data.txt", "w") as file:
+        for index, record in enumerate(records):
+            for i in range(MAX_RECORD_LENGTH):
+                if i < len(record):
+                    file.write(str(record[i]))
+                else:
+                    file.write("None")
+
+                if i != MAX_RECORD_LENGTH - 1:
+                    file.write(" ")
+
+            if index < len(records) - 1:
+                file.write("\n")
+
+
 def main() -> None:
     records = generate_records()
     for record in records:
         print(record)
+
+    save_records(records)
 
 
 if __name__ == "__main__":
