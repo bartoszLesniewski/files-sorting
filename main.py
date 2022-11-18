@@ -1,10 +1,12 @@
 import random
-MAX_RECORD_LENGTH = 15
-MIN_NUMBER = -100
-MAX_NUMBER = 100
+
+from constans import *
+from tape import Tape
+
+next_tape = None  # it needs to be fixed
 
 
-def generate_records() -> list[list[int]]:
+def generate_records():
     records = []
     number_of_records = 40
 
@@ -16,7 +18,7 @@ def generate_records() -> list[list[int]]:
     return records
 
 
-def rand_record(record_length) -> list[int]:
+def rand_record(record_length):
     numbers = []
     while record_length:
         numbers.append(random.randint(MIN_NUMBER, MAX_NUMBER))
@@ -41,12 +43,45 @@ def save_records(records):
                 file.write("\n")
 
 
-def main() -> None:
-    records = generate_records()
-    for record in records:
-        print(record)
+def read_file2():
+    # reader = FileHandler("data.txt")
+    tape1 = Tape("tape1.txt")
+    tape2 = Tape("tape2.txt")
+    distribution.next_tape = tape2
+    tape3 = Tape("tape3.txt")
+    copy_initial_file()
 
-    save_records(records)
+    while not tape1.fileHandler.eof:
+        tape1.read_from_file()
+        distribution(tape1, tape2, tape3)
+
+    pass
+
+
+def copy_initial_file():
+    with open("data.txt", "r") as initial_file, open("tape1.txt", "w") as tape_file:
+        for line in initial_file:
+            tape_file.write(line)
+
+
+def distribution(tape1, tape2, tape3):
+    # next_tape = tape2
+    while tape1.block.current_size > 0:
+        record = tape1.fetch_record()
+
+        if distribution.next_tape.block.current_size > 0 and distribution.next_tape.block.records[-1] > record:
+            distribution.next_tape = tape2 if distribution.next_tape == tape3 else tape3
+
+        distribution.next_tape.add_record(record)
+
+
+distribution.next_tape = None
+
+
+def main() -> None:
+    # records= generate_records()
+    # save_records(records)
+    read_file2()
 
 
 if __name__ == "__main__":
