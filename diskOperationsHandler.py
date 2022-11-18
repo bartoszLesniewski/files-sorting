@@ -22,20 +22,12 @@ class DiskOperationsHandler:
                     self.eof = True
                     break
 
-    # @staticmethod
-    # def convert_record(record_line):
-    #     record_line_split = record_line.split()
-    #     record = Record()
-    #
-    #     for item in record_line_split:
-    #         if item != "None":
-    #             record.add(int(item))
-    #         else:
-    #             break
-    #
-    #     return record
-
     def write_block(self, tape):
         with open(self.filename, "a") as file:
             file.write(tape.block.serialize())
             tape.block.clear()
+
+    def reset(self):
+        self.eof = False
+        self.last_position = 0
+

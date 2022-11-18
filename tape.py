@@ -7,7 +7,7 @@ class Tape:
     def __init__(self, filename):
         self.filename = filename
         self.block = Block(self.filename)
-        open(filename, "w").close()  # create an empty file or overwrite file if it already exists
+        open(self.filename, "w").close()  # create an empty file or overwrite file if it already exists
         self.fileHandler = DiskOperationsHandler(self.filename)
 
     def add_record(self, record):
@@ -19,11 +19,24 @@ class Tape:
             self.add_record(record)
 
     def fetch_record(self):
-        self.block.current_size -= RECORD_SIZE
-        return self.block.records.pop(0)
+        if self.block.is_empty() and self.fileHandler.eof:
+            return None
+        else:
+            if self.block.is_empty():
+                self.read_block_from_file()
+
+            # after reading a block, it can still be empty, because end of file can be reached when trying to read
+            if not self.block.is_empty():
+                self.block.current_size -= RECORD_SIZE
+                return self.block.records.pop(0)
 
     def read_block_from_file(self):
         self.fileHandler.read_block(self)
 
     def save_block_to_file(self):
         self.fileHandler.write_block(self)
+
+    def clear(self):
+        self.block.clear()
+        self.fileHandler.reset()
+        open(self.filename, "w").close()

@@ -26,16 +26,34 @@ class Record:
         return self.numbers[0]
 
     def __lt__(self, other):
+        if other is None:
+            return False
+
         return self.get_sum() < other.get_sum()
 
     def __le__(self, other):
+        if other is None:
+            return False
+
         return self.get_sum() <= other.get_sum()
 
     def __gt__(self, other):
+        if other is None:
+            return True
+
         return self.get_sum() > other.get_sum()
 
     def __ge__(self, other):
+        if other is None:
+            return True
+
         return self.get_sum() >= other.get_sum()
 
     def __eq__(self, other):
+        if other is None:
+            return False
+
         return self.get_sum() == other.get_sum()
+
+    def print(self):
+        print(self.numbers)
