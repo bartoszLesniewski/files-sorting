@@ -14,3 +14,5 @@ class Block:
         self.current_size = 0
         self.records.clear()
 
+    def is_empty(self):
+        return self.current_size == 0

@@ -2,7 +2,7 @@ from constans import MAX_BLOCK_SIZE, MAX_RECORD_LENGTH
 from record import Record
 
 
-class FileHandler:
+class DiskOperationsHandler:
     def __init__(self, filename):
         self.filename = filename
         self.eof = False
