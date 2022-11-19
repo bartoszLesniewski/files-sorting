@@ -1,4 +1,4 @@
-from constans import MAX_BLOCK_SIZE, MAX_RECORD_LENGTH
+from constans import MAX_BLOCK_SIZE
 from record import Record
 
 
@@ -30,4 +30,3 @@ class DiskOperationsHandler:
     def reset(self):
         self.eof = False
         self.last_position = 0
-

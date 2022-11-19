@@ -1,6 +1,6 @@
 
 class Block:
-    def __init__(self, tape_filename):
+    def __init__(self):
         self.current_size = 0
         self.records = []
 

@@ -6,7 +6,7 @@ from diskOperationsHandler import DiskOperationsHandler
 class Tape:
     def __init__(self, filename):
         self.filename = filename
-        self.block = Block(self.filename)
+        self.block = Block()
         open(self.filename, "w").close()  # create an empty file or overwrite file if it already exists
         self.fileHandler = DiskOperationsHandler(self.filename)
 
