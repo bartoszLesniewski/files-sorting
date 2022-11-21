@@ -5,10 +5,8 @@ from diskOperationsHandler import DiskOperationsHandler
 
 class Tape:
     def __init__(self, filename):
-        self.filename = filename
         self.block = Block()
-        open(self.filename, "w").close()  # create an empty file or overwrite file if it already exists
-        self.fileHandler = DiskOperationsHandler(self.filename)
+        self.fileHandler = DiskOperationsHandler(filename)
 
     def add_record(self, record):
         if self.block.current_size < MAX_BLOCK_SIZE:
@@ -39,4 +37,3 @@ class Tape:
     def clear(self):
         self.block.clear()
         self.fileHandler.reset()
-        open(self.filename, "w").close()

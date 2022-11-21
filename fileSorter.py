@@ -1,4 +1,5 @@
 from tape import Tape
+import os
 
 
 class FileSorter:
@@ -9,6 +10,7 @@ class FileSorter:
         self.tape3 = Tape("tape3.txt")
         self.next_tape = self.tape2
         self.file_sorted = False
+        self.number_of_phases = 0
 
     def sort(self):
         self.copy_initial_file()
@@ -16,11 +18,16 @@ class FileSorter:
             self.distribute()
             self.merge()
             self.next_tape = self.tape2
+            self.number_of_phases += 1
+
+        pass
 
     def copy_initial_file(self):
-        with open(self.initial_filename, "r") as initial_file, open("tape1.txt", "w") as tape_file:
+        with open(self.initial_filename, "r") as initial_file, open(self.tape1.fileHandler.filename, "w") as tape_file:
             for line in initial_file:
                 tape_file.write(line)
+
+        self.tape1.fileHandler.update_filesize()
 
     def distribute(self):
         while True:
@@ -34,6 +41,8 @@ class FileSorter:
                 self.next_tape.add_record(record)
 
         self.flush_tapes(self.tape2, self.tape3)
+        self.tape2.fileHandler.update_filesize()
+        self.tape3.fileHandler.update_filesize()
 
     def merge(self):
         self.tape1.clear()

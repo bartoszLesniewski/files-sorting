@@ -8,7 +8,7 @@ class Block:
         serialized_records = [record.serialize() for record in self.records]
         serialized_block = "\n".join(serialized_records)
 
-        return serialized_block + "\n"
+        return serialized_block
 
     def clear(self):
         self.current_size = 0
