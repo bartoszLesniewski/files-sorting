@@ -53,3 +53,8 @@ class DiskOperationsHandler:
 
     def update_filesize(self):
         self.filesize = os.path.getsize(self.filename)
+
+    @staticmethod
+    def reset_counters():
+        DiskOperationsHandler.number_of_reads = 0
+        DiskOperationsHandler.number_of_writes = 0

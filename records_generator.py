@@ -1,18 +1,17 @@
 import random
-from constans import MAX_RECORD_LENGTH, MIN_NUMBER, MAX_NUMBER, NUMBER_OF_RECORDS
+from constans import MAX_RECORD_LENGTH, MIN_NUMBER, MAX_NUMBER
+from diskOperationsHandler import DiskOperationsHandler
+from record import Record
 
 
-def generate_records():
-    records = []
-    number_of_records = NUMBER_OF_RECORDS
-
+def generate_random_records(tape, number_of_records=1000):
     while number_of_records:
         record_length = random.randint(1, MAX_RECORD_LENGTH)
-        records.append(rand_record(record_length))
+        tape.add_record(Record(rand_record(record_length)))
         number_of_records -= 1
 
-    return records
-
+    tape.flush()
+    DiskOperationsHandler.reset_counters()
 
 def rand_record(record_length):
     numbers = []
@@ -21,3 +20,15 @@ def rand_record(record_length):
         record_length -= 1
 
     return numbers
+
+
+def load_records_from_keyboard(tape):
+    pass
+
+
+def load_records_from_test_file(test_file_name, tape):
+    with open(test_file_name, "r") as initial_file, open(tape.fileHandler.filename, "w") as tape_file:
+        for line in initial_file:
+            tape_file.write(line)
+
+    tape.fileHandler.update_filesize()

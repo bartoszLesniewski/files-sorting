@@ -4,7 +4,7 @@ from diskOperationsHandler import DiskOperationsHandler
 
 
 class Tape:
-    def __init__(self, filename):
+    def __init__(self, filename="tape1.txt"):
         self.block = Block()
         self.fileHandler = DiskOperationsHandler(filename)
 
@@ -33,6 +33,10 @@ class Tape:
 
     def save_block_to_file(self):
         self.fileHandler.write_block(self)
+
+    def flush(self):
+        if not self.block.is_empty():
+            self.save_block_to_file()
 
     def clear(self):
         self.block.clear()

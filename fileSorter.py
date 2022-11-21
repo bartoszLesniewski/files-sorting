@@ -1,10 +1,11 @@
+from diskOperationsHandler import DiskOperationsHandler
+from records_generator import generate_random_records, load_records_from_keyboard, load_records_from_test_file
 from tape import Tape
 import os
 
 
 class FileSorter:
-    def __init__(self, initial_filename):
-        self.initial_filename = initial_filename
+    def __init__(self):
         self.tape1 = Tape("tape1.txt")
         self.tape2 = Tape("tape2.txt")
         self.tape3 = Tape("tape3.txt")
@@ -12,25 +13,51 @@ class FileSorter:
         self.file_sorted = False
         self.number_of_phases = 0
 
+    def run(self):
+        self.display_main_menu()
+        program_exit = self.choose_menu_option()
+        if not program_exit:
+            self.sort()
+
+    @staticmethod
+    def display_main_menu():
+        print("======= DATABASE STRUCTURES - PROJECT 1: FILE SORTING =======")
+        print("================ Bartosz Lesniewski,  184783 ================")
+        print("1. Generate random records.")
+        print("2. Load records using keyboard.")
+        print("3. Load test data from file.")
+        print("4. Exit.")
+
+    def choose_menu_option(self):
+        program_exit = False
+        option_number = input("Please enter an option number: ")
+
+        if option_number == "1":
+            generate_random_records(self.tape1)
+        elif option_number == "2":
+            load_records_from_keyboard(self.tape1)
+        elif option_number == "3":
+            test_file_name = input("Please enter a test file name: ")
+            load_records_from_test_file(test_file_name, self.tape1)
+        elif option_number == "4":
+            program_exit = True
+        else:
+            print("Incorrect option.")
+            program_exit = True
+
+        return program_exit
+
     def sort(self):
-        self.copy_initial_file()
         while not self.file_sorted:
             self.distribute()
             self.merge()
             self.next_tape = self.tape2
             self.number_of_phases += 1
-
-        pass
-
-    def copy_initial_file(self):
-        with open(self.initial_filename, "r") as initial_file, open(self.tape1.fileHandler.filename, "w") as tape_file:
-            for line in initial_file:
-                tape_file.write(line)
-
-        self.tape1.fileHandler.update_filesize()
+            if DiskOperationsHandler.number_of_reads != DiskOperationsHandler.number_of_writes:
+                pass
 
     def distribute(self):
-        while True:
+        while not self.tape1.fileHandler.eof:
             record = self.tape1.fetch_record()
             if record is None:
                 break
@@ -97,8 +124,7 @@ class FileSorter:
     @staticmethod
     def flush_tapes(*args):
         for tape in args:
-            if not tape.block.is_empty():
-                tape.save_block_to_file()
+            tape.flush()
 
     @staticmethod
     def clear_tapes(*args):

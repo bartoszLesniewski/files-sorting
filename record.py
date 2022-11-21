@@ -2,8 +2,8 @@ from constans import MAX_RECORD_LENGTH
 
 
 class Record:
-    def __init__(self):
-        self.numbers = []
+    def __init__(self, numbers=None):
+        self.numbers = [] if numbers is None else numbers
         self.tmp_sum = 0
 
     def deserialize(self, serialized_record):
