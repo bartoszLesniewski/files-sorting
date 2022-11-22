@@ -1,7 +1,5 @@
-from diskOperationsHandler import DiskOperationsHandler
 from records_generator import generate_random_records, load_records_from_keyboard, load_records_from_test_file
 from tape import Tape
-import os
 
 
 class FileSorter:
@@ -53,11 +51,10 @@ class FileSorter:
             self.merge()
             self.next_tape = self.tape2
             self.number_of_phases += 1
-            if DiskOperationsHandler.number_of_reads != DiskOperationsHandler.number_of_writes:
-                pass
+        pass
 
     def distribute(self):
-        while not self.tape1.fileHandler.eof:
+        while True:
             record = self.tape1.fetch_record()
             if record is None:
                 break
@@ -68,8 +65,6 @@ class FileSorter:
                 self.next_tape.add_record(record)
 
         self.flush_tapes(self.tape2, self.tape3)
-        self.tape2.fileHandler.update_filesize()
-        self.tape3.fileHandler.update_filesize()
 
     def merge(self):
         self.tape1.clear()

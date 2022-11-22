@@ -5,8 +5,6 @@ from diskOperationsHandler import DiskOperationsHandler
 from fileSorter import FileSorter
 from tabulate import tabulate
 
-from records_generator import generate_random_records
-
 
 def main():
     sorter = FileSorter()

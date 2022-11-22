@@ -13,6 +13,7 @@ def generate_random_records(tape, number_of_records=1000):
     tape.flush()
     DiskOperationsHandler.reset_counters()
 
+
 def rand_record(record_length):
     numbers = []
     while record_length:
