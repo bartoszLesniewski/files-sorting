@@ -56,4 +56,10 @@ class Record:
         return self.get_sum() == other.get_sum()
 
     def print(self):
-        print(self.numbers)
+        # for number in self.numbers:
+        #     print(number, end=" ")
+        for i in range(MAX_RECORD_LENGTH):
+            if i < len(self.numbers):
+                print(self.numbers[i], end=" ")
+            else:
+                print("None", end=" ")

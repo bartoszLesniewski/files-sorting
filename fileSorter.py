@@ -1,3 +1,9 @@
+import math
+
+from tabulate import tabulate
+
+from constans import b, MAX_RECORD_LENGTH
+from diskOperationsHandler import DiskOperationsHandler
 from records_generator import generate_random_records, load_records_from_keyboard, load_records_from_test_file
 from tape import Tape
 
@@ -10,12 +16,16 @@ class FileSorter:
         self.next_tape = self.tape2
         self.file_sorted = False
         self.number_of_phases = 0
+        self.number_of_records = 0
 
     def run(self):
         self.display_main_menu()
         program_exit = self.choose_menu_option()
         if not program_exit:
+            # self.print_file("before")
             self.sort()
+            # self.print_file("after")
+            self.show_statistics()
 
     @staticmethod
     def display_main_menu():
@@ -31,12 +41,14 @@ class FileSorter:
         option_number = input("Please enter an option number: ")
 
         if option_number == "1":
-            generate_random_records(self.tape1)
+            self.choose_number_of_records()
+            generate_random_records(self.tape1, self.number_of_records)
         elif option_number == "2":
-            load_records_from_keyboard(self.tape1)
+            self.choose_number_of_records()
+            load_records_from_keyboard(self.tape1, self.number_of_records)
         elif option_number == "3":
             test_file_name = input("Please enter a test file name: ")
-            load_records_from_test_file(test_file_name, self.tape1)
+            self.number_of_records = load_records_from_test_file(test_file_name, self.tape1)
         elif option_number == "4":
             program_exit = True
         else:
@@ -44,6 +56,9 @@ class FileSorter:
             program_exit = True
 
         return program_exit
+
+    def choose_number_of_records(self):
+        self.number_of_records = int(input("How many records do you want to generate? "))
 
     def sort(self):
         while not self.file_sorted:
@@ -134,3 +149,33 @@ class FileSorter:
                 last_record = None  # to avoid incrementing counter in the next iteration under the same condition
 
         return last_record, counter
+
+    def show_statistics(self):
+        worst_number_of_phases = math.ceil(math.log(self.number_of_records, 2))
+        worst_number_of_rw = (4 * self.number_of_records * worst_number_of_phases) / b
+
+        average_number_of_phases = math.ceil(math.log(self.number_of_records / 2, 2))
+        average_number_of_rw = (4 * self.number_of_records * average_number_of_phases) / b
+
+        headers = ["Parameter", "Achieved value", "Worst value", "Average value"]
+        table = [["Number of reads", DiskOperationsHandler.number_of_reads, worst_number_of_rw, average_number_of_rw],
+                 ["Number of writes", DiskOperationsHandler.number_of_writes, worst_number_of_rw, average_number_of_rw],
+                 ["Number of phases", self.number_of_phases, worst_number_of_phases, average_number_of_phases]]
+
+        print()
+        print(tabulate(table, headers, tablefmt="pretty"))
+
+    def print_file(self, mode):
+        DiskOperationsHandler.disable_counting()
+        print(f"\n---------- File {mode} sorting ----------")
+
+        while True:
+            record = self.tape1.fetch_record()
+            if record is None:
+                break
+            else:
+                record.print()
+                print()
+
+        DiskOperationsHandler.enable_counting()
+        self.tape1.fileHandler.make_file_readable()

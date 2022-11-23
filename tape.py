@@ -1,6 +1,7 @@
 from block import Block
 from constans import *
 from diskOperationsHandler import DiskOperationsHandler
+from record import Record
 
 
 class Tape:
@@ -9,6 +10,11 @@ class Tape:
         self.fileHandler = DiskOperationsHandler(filename)
 
     def add_record(self, record):
+        if isinstance(record, str):
+            serialized_record = record
+            record = Record()
+            record.deserialize(serialized_record)
+
         if self.block.current_size < MAX_BLOCK_SIZE:
             self.block.records.append(record)
             self.block.current_size += RECORD_SIZE
