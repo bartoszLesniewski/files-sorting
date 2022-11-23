@@ -66,6 +66,7 @@ class FileSorter:
             self.merge()
             self.next_tape = self.tape2
             self.number_of_phases += 1
+
         pass
 
     def distribute(self):
@@ -81,55 +82,63 @@ class FileSorter:
 
         self.flush_tapes(self.tape2, self.tape3)
 
+        # in case the input file was already sorted
+        if self.tape2.fileHandler.filesize == 0 or self.tape3.fileHandler.filesize == 0:
+            self.file_sorted = True
+
     def merge(self):
-        self.tape1.clear()
-        tape2_record, tape2_last_record = None, None
-        tape3_record, tape3_last_record = None, None
-        tape2_runs_counter, tape3_runs_counter = 0, 0
+        # it the input file was already sorted, it will be detected during distribution
+        # so there is no need to merge
+        if not self.file_sorted:
+            self.tape1.clear()
+            tape2_record, tape2_last_record = None, None
+            tape3_record, tape3_last_record = None, None
+            tape2_runs_counter, tape3_runs_counter = 0, 0
 
-        while True:
-            # Already merged record is marked as None.
-            # If record is not merged yet, it will be used in the next iteration.
-            tape2_record = self.tape2.fetch_record() if tape2_record is None else tape2_record
-            tape3_record = self.tape3.fetch_record() if tape3_record is None else tape3_record
+            while True:
+                # Already merged record is marked as None.
+                # If record is not merged yet, it will be used in the next iteration.
+                tape2_record = self.tape2.fetch_record() if tape2_record is None else tape2_record
+                tape3_record = self.tape3.fetch_record() if tape3_record is None else tape3_record
 
-            tape2_last_record, tape2_runs_counter = self.update_numbers_of_runs(tape2_record,
-                                                                                tape2_last_record,
-                                                                                tape2_runs_counter)
-            tape3_last_record, tape3_runs_counter = self.update_numbers_of_runs(tape3_record,
-                                                                                tape3_last_record,
-                                                                                tape3_runs_counter)
+                tape2_last_record, tape2_runs_counter = self.update_numbers_of_runs(tape2_record,
+                                                                                    tape2_last_record,
+                                                                                    tape2_runs_counter)
+                tape3_last_record, tape3_runs_counter = self.update_numbers_of_runs(tape3_record,
+                                                                                    tape3_last_record,
+                                                                                    tape3_runs_counter)
 
-            if tape2_record is None and tape3_record is None:
-                break
-            else:
-                if tape2_record is None:
-                    self.tape1.add_record(tape3_record)
-                    tape3_last_record = tape3_record
-                    tape3_record = None
-                elif tape3_record is None:
-                    self.tape1.add_record(tape2_record)
-                    tape2_last_record = tape2_record
-                    tape2_record = None
+                if tape2_record is None and tape3_record is None:
+                    # or (tape2_record.is_empty() or tape3_record.is_empty()):
+                    break
                 else:
-                    if (tape2_runs_counter < tape3_runs_counter or
-                       tape2_record <= tape3_record and tape2_runs_counter == tape3_runs_counter):
-                        self.tape1.add_record(tape2_record)
-                        tape2_last_record = tape2_record
-                        tape2_record = None
-                    elif (tape3_runs_counter < tape2_runs_counter or
-                          tape3_record < tape2_record and tape2_runs_counter == tape3_runs_counter):
+                    if tape2_record is None:
                         self.tape1.add_record(tape3_record)
                         tape3_last_record = tape3_record
                         tape3_record = None
+                    elif tape3_record is None:
+                        self.tape1.add_record(tape2_record)
+                        tape2_last_record = tape2_record
+                        tape2_record = None
                     else:
-                        print("Unhandled condition occurred!")
+                        if (tape2_runs_counter < tape3_runs_counter or
+                           tape2_record <= tape3_record and tape2_runs_counter == tape3_runs_counter):
+                            self.tape1.add_record(tape2_record)
+                            tape2_last_record = tape2_record
+                            tape2_record = None
+                        elif (tape3_runs_counter < tape2_runs_counter or
+                              tape3_record < tape2_record and tape2_runs_counter == tape3_runs_counter):
+                            self.tape1.add_record(tape3_record)
+                            tape3_last_record = tape3_record
+                            tape3_record = None
+                        else:
+                            print("Unhandled condition occurred!")
 
-        self.flush_tapes(self.tape1)
-        self.clear_tapes(self.tape2, self.tape3)
+            self.flush_tapes(self.tape1)
+            self.clear_tapes(self.tape2, self.tape3)
 
-        if tape2_runs_counter + tape3_runs_counter <= 2:
-            self.file_sorted = True
+            if tape2_runs_counter + tape3_runs_counter <= 2:
+                self.file_sorted = True
 
     @staticmethod
     def flush_tapes(*args):

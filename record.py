@@ -63,3 +63,6 @@ class Record:
                 print(self.numbers[i], end=" ")
             else:
                 print("None", end=" ")
+
+    # def is_empty(self):
+    #     return len(self.numbers) == 0
