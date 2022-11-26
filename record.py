@@ -46,8 +46,7 @@ class Record:
         :return: Sum of numbers in a record.
         :rtype: int
         """
-        # return sum(self.numbers)
-        return self.numbers[0]
+        return sum(self.numbers)
 
     def __lt__(self, other):
         """

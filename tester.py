@@ -2,6 +2,7 @@ import random
 import os
 
 from diskOperationsHandler import DiskOperationsHandler
+from enums import Mode
 from fileSorter import FileSorter
 from records_generator import generate_random_records, load_records_from_test_file
 from tape import Tape
@@ -22,6 +23,7 @@ def run_tests():
             normal_sorted_records = normal_sorting("tests/" + file)
             sorter = FileSorter("tests/result_" + file)
             sorter.number_of_records = len(normal_sorted_records)
+            sorter.mode = Mode.NON_VERBOSE
             load_records_from_test_file("tests/" + file, sorter.tape1)
             sorter.natural_merge_sort()
             natural_sorted_records = get_records("tests/result_" + file)
@@ -31,7 +33,7 @@ def run_tests():
 
 def normal_sorting(filename):
     records = get_records(filename)
-    records.sort(key=lambda x: x[0])
+    records.sort(key=lambda x: sum(x))
     return records
 
 
@@ -54,13 +56,13 @@ def get_records(filename):
 
 
 def compare_results(natural_sorting, normal_sorting, file):
-    # print(f"Checking {file}")
     if len(natural_sorting) != len(normal_sorting):
         print("Different lengths of sorted lists!")
     else:
         for i in range(len(natural_sorting)):
-            if natural_sorting[i][0] != normal_sorting[i][0]:
-                print(f"Different order detected in line {i}!")
+            if sum(natural_sorting[i]) != sum(normal_sorting[i]):
+                print(f"Checking {file}")
+                print(f"Different order detected in record {i}!")
                 print("result file: " + str(natural_sorting[i]))
                 print("normal sorting: " + str(normal_sorting[i]))
 
