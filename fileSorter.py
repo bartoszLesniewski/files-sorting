@@ -2,8 +2,9 @@ import math
 
 from tabulate import tabulate
 
-from constans import b, MAX_RECORD_LENGTH
+from constans import b
 from diskOperationsHandler import DiskOperationsHandler
+from enums import *
 from records_generator import generate_random_records, load_records_from_keyboard, load_records_from_test_file
 from tape import Tape
 
@@ -21,6 +22,7 @@ class FileSorter:
         self.file_sorted = False
         self.number_of_phases = 0
         self.number_of_records = 0
+        self.mode = None
 
     def run(self):
         """
@@ -30,9 +32,10 @@ class FileSorter:
         self.display_main_menu()
         program_exit = self.choose_menu_option()
         if not program_exit:
-            # self.print_file("before")
-            self.sort()
-            # self.print_file("after")
+            self.choose_mode()
+            self.print_file(PrintStage.BEFORE_SORTING)
+            self.natural_merge_sort()
+            self.print_file(PrintStage.AFTER_SORTING)
             self.show_statistics()
 
     @staticmethod
@@ -54,21 +57,21 @@ class FileSorter:
         :rtype: bool
         """
         program_exit = False
-        option_number = input("Please enter an option number: ")
+        option_number = int(input("Please enter an option number: "))
 
-        if option_number == "1":
+        if option_number == MainMenuOptions.RANDOM_RECORDS.value:
             self.choose_number_of_records()
             generate_random_records(self.tape1, self.number_of_records)
-        elif option_number == "2":
+        elif option_number == MainMenuOptions.KEYBOARD.value:
             self.choose_number_of_records()
             load_records_from_keyboard(self.tape1, self.number_of_records)
-        elif option_number == "3":
+        elif option_number == MainMenuOptions.FILE.value:
             test_file_name = input("Please enter a test file name: ")
             self.number_of_records = load_records_from_test_file(test_file_name, self.tape1)
-        elif option_number == "4":
+        elif option_number == MainMenuOptions.EXIT.value:
             program_exit = True
         else:
-            print("Incorrect option.")
+            print("Invalid option.")
             program_exit = True
 
         return program_exit
@@ -80,7 +83,27 @@ class FileSorter:
         """
         self.number_of_records = int(input("How many records do you want to generate? "))
 
-    def sort(self):
+    def choose_mode(self):
+        """
+        Asks the user to select a message display mode.
+        """
+        print("-------------- MODE SELECTION --------------")
+        print("1. Verbose mode with printing entire records.")
+        print("2. Verbose mode with printing the sorting criterion (sum of numbers in the record).")
+        print("3. Non verbose mode (without additional messages).")
+        selected_mode = int(input("Choose the mode of printing the message after each phase: "))
+
+        if selected_mode == Mode.VERBOSE_RECORDS.value:
+            self.mode = Mode.VERBOSE_RECORDS
+        elif selected_mode == Mode.VERBOSE_SUM.value:
+            self.mode = Mode.VERBOSE_SUM
+        elif selected_mode == Mode.NON_VERBOSE:
+            self.mode = Mode.NON_VERBOSE
+        else:
+            print("Invalid option!")
+            self.mode = Mode.NON_VERBOSE
+
+    def natural_merge_sort(self):
         """
         Invokes successive sorting phases (which consist of distribution and merging) until the file is sorted
         and counts them.
@@ -90,6 +113,8 @@ class FileSorter:
             self.merge()
             self.next_tape = self.tape2
             self.number_of_phases += 1
+            if self.mode != Mode.NON_VERBOSE:
+                self.print_file(PrintStage.AFTER_PHASE)
 
         pass
 
@@ -263,18 +288,26 @@ class FileSorter:
         or after a specific phase.
 
         :param print_stage: The stage after which the file is printed (only used to display appropriate information)
-        :type print_stage: str
+        :type print_stage: PrintStage
         """
         DiskOperationsHandler.disable_counting()
-        print(f"\n---------- File {print_stage} sorting ----------")
+        print("\n---------- File "
+              f"{print_stage.value} "
+              f'{str(self.number_of_phases) + " " if print_stage == PrintStage.AFTER_PHASE else ""}'
+              "----------")
 
         while True:
             record = self.tape1.fetch_record()
             if record is None:
                 break
             else:
-                record.print()
-                print()
+                if self.mode == Mode.VERBOSE_RECORDS or \
+                   print_stage == PrintStage.BEFORE_SORTING or \
+                   print_stage == PrintStage.AFTER_SORTING:
+                    record.print()
+                    print()
+                else:
+                    print(record.get_sum())
 
         DiskOperationsHandler.enable_counting()
         self.tape1.fileHandler.make_file_readable()

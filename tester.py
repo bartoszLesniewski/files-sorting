@@ -23,7 +23,7 @@ def run_tests():
             sorter = FileSorter("tests/result_" + file)
             sorter.number_of_records = len(normal_sorted_records)
             load_records_from_test_file("tests/" + file, sorter.tape1)
-            sorter.sort()
+            sorter.natural_merge_sort()
             natural_sorted_records = get_records("tests/result_" + file)
             compare_results(natural_sorted_records, normal_sorted_records, file)
             sorter.show_statistics()
