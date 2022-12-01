@@ -117,8 +117,6 @@ class FileSorter:
             if self.mode != Mode.NON_VERBOSE:
                 self.print_file(PrintStage.AFTER_PHASE)
 
-        pass
-
     def distribute(self):
         """
         Alternately distributes runs from tape 1 to tapes 2 and 3.
@@ -314,6 +312,8 @@ class FileSorter:
         :type print_stage: PrintStage
         """
         DiskOperationsHandler.disable_counting()
+        self.tape1.fileHandler.make_file_readable()
+
         print("\n---------- File "
               f"{print_stage.value} "
               f'{str(self.number_of_phases) + " " if print_stage == PrintStage.AFTER_PHASE else ""}'
