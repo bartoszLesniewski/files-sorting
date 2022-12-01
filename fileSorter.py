@@ -92,13 +92,13 @@ class FileSorter:
         print("1. Verbose mode with printing entire records.")
         print("2. Verbose mode with printing the sorting criterion (sum of numbers in the record).")
         print("3. Non verbose mode (without additional messages).")
-        selected_mode = int(input("Choose the mode of printing the message after each phase: "))
+        selected_mode = int(input("Choose the mode of printing the file after each phase: "))
 
         if selected_mode == Mode.VERBOSE_RECORDS.value:
             self.mode = Mode.VERBOSE_RECORDS
         elif selected_mode == Mode.VERBOSE_SUM.value:
             self.mode = Mode.VERBOSE_SUM
-        elif selected_mode == Mode.NON_VERBOSE:
+        elif selected_mode == Mode.NON_VERBOSE.value:
             self.mode = Mode.NON_VERBOSE
         else:
             print("Invalid option!")
@@ -324,9 +324,9 @@ class FileSorter:
             if record is None:
                 break
             else:
-                if self.mode == Mode.VERBOSE_RECORDS or \
-                   print_stage == PrintStage.BEFORE_SORTING or \
-                   print_stage == PrintStage.AFTER_SORTING:
+                if (self.mode == Mode.VERBOSE_RECORDS) or \
+                   (print_stage == PrintStage.BEFORE_SORTING and self.mode == Mode.NON_VERBOSE) or \
+                   (print_stage == PrintStage.AFTER_SORTING and self.mode == Mode.NON_VERBOSE):
                     record.print()
                     print()
                 else:
