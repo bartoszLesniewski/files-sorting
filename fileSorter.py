@@ -1,5 +1,4 @@
 import math
-
 from tabulate import tabulate
 
 from constans import b
@@ -11,7 +10,8 @@ from tape import Tape
 
 class FileSorter:
     """The class which handles all operations related to sorting a file."""
-    def __init__(self, tape1_filename="tape1.txt", tape2_filename="tape2.txt", tape3_filename="tape3.txt"):
+    def __init__(self, tape1_filename="tape1.txt", tape2_filename="tape2.txt", tape3_filename="tape3.txt",
+                 experiment_input_filename=None):
         """
         Initializes FileSorter object which is responsible for the entire sorting process.
         """
@@ -23,6 +23,7 @@ class FileSorter:
         self.number_of_phases = 0
         self.number_of_records = 0
         self.mode = None
+        self.experiment_input_filename = experiment_input_filename
 
     def run(self):
         """
@@ -85,7 +86,7 @@ class FileSorter:
 
     def choose_mode(self):
         """
-        Asks the user to select a message display mode.
+        Asks the user to select a file display mode.
         """
         print("-------------- MODE SELECTION --------------")
         print("1. Verbose mode with printing entire records.")
@@ -164,7 +165,6 @@ class FileSorter:
                                                                                     tape3_runs_counter)
 
                 if tape2_record is None and tape3_record is None:
-                    # or (tape2_record.is_empty() or tape3_record.is_empty()):
                     break
                 else:
                     # if tape 2 has finished, the run from tape 3 has no run to merge with,
@@ -222,7 +222,7 @@ class FileSorter:
     @staticmethod
     def clear_tapes(*args):
         """
-        Clears all passed tapes.
+        Clears all tapes passed as arguments.
 
         :param args: A variable number of arguments - tapes to be cleared.
         :type args: Tape
@@ -256,31 +256,54 @@ class FileSorter:
         Prints the table comparing the calculated values of the number of reads and writes and the number of phases
         with the theoretical values.
         """
+        theoretical_values = self.calculate_theoretical_values()
+
+        headers = ["Parameter", "Real value", "Worst value", "Average value"]
+        table = [["Number of reads and writes (reads + writes)",
+                  f"{DiskOperationsHandler.number_of_reads + DiskOperationsHandler.number_of_writes} "
+                  f"({DiskOperationsHandler.number_of_reads} + {DiskOperationsHandler.number_of_writes})",
+                  theoretical_values["worst number of rw"], theoretical_values["average number of rw"]],
+                 ["Number of phases", self.number_of_phases, theoretical_values["worst number of phases"],
+                  theoretical_values["average number of phases"]]]
+
+        print(f"\nStatistics for {self.number_of_records} records:")
+        print(tabulate(table, headers, tablefmt="pretty"))
+
+    def calculate_theoretical_values(self):
+        """
+        Calculates theoretical values of the number of reads and writes and the number of phases
+        in the worst and average cases.
+
+        :return: The above-mentioned theoretical values.
+        :rtype: dict
+        """
         worst_number_of_phases = math.ceil(math.log(self.number_of_records, 2))
         worst_number_of_rw = (4 * self.number_of_records * worst_number_of_phases) / b
 
         average_number_of_phases = math.ceil(math.log(self.number_of_records / 2, 2))
         average_number_of_rw = (4 * self.number_of_records * average_number_of_phases) / b
+        theoretical_values = {"worst number of phases": worst_number_of_phases,
+                              "worst number of rw": worst_number_of_rw,
+                              "average number of phases": average_number_of_phases,
+                              "average number of rw": average_number_of_rw}
 
-        headers = ["Parameter", "Achieved value", "Worst value", "Average value"]
-        table = [["Number of reads", DiskOperationsHandler.number_of_reads, worst_number_of_rw, average_number_of_rw],
-                 ["Number of writes", DiskOperationsHandler.number_of_writes, worst_number_of_rw, average_number_of_rw],
-                 ["Number of phases", self.number_of_phases, worst_number_of_phases, average_number_of_phases]]
+        return theoretical_values
 
-        # print()
-        # print(tabulate(table, headers, tablefmt="pretty"))
+    def get_statistics(self):
+        """
+        Returns statistics (only used for the experiment).
 
-        if DiskOperationsHandler.number_of_reads + DiskOperationsHandler.number_of_writes > worst_number_of_rw:
-            print(self.tape1.fileHandler.filename + " ERROR:")
-            print(f"Too many r/w operations for {self.number_of_records} records!")
-            print(f"Achieved {DiskOperationsHandler.number_of_reads + DiskOperationsHandler.number_of_writes} "
-                  f"while the worst should be {worst_number_of_rw} and average {average_number_of_rw}")
+        :return: Statistics containing calculated theoretical values and obtained values.
+        :rtype: dict
+        """
+        statistics = self.calculate_theoretical_values()
+        statistics.update({"number of reads": DiskOperationsHandler.number_of_reads,
+                           "number of writes": DiskOperationsHandler.number_of_writes,
+                           "total number of rw": DiskOperationsHandler.number_of_reads +
+                           DiskOperationsHandler.number_of_writes,
+                           "number of phases": self.number_of_phases})
 
-        if self.number_of_phases > worst_number_of_phases:
-            print(self.tape1.fileHandler.filename + " ERROR:")
-            print(f"Too many phases for {self.number_of_records} records!")
-            print(f"Achieved {self.number_of_phases} "
-                  f"while the worst should be {worst_number_of_phases} and average {average_number_of_phases}")
+        return statistics
 
     def print_file(self, print_stage):
         """
@@ -311,3 +334,19 @@ class FileSorter:
 
         DiskOperationsHandler.enable_counting()
         self.tape1.fileHandler.make_file_readable()
+
+    def run_for_experiment(self):
+        """
+        Runs the sorting program for the experiment, i.e. bypassing the menu, loading records from the file
+        generated for the experiment
+
+        :return: Statistics generated for the experiment file.
+        :rtype: dict
+        """
+        self.number_of_records = load_records_from_test_file(self.experiment_input_filename, self.tape1)
+        self.mode = Mode.NON_VERBOSE
+        self.natural_merge_sort()
+        self.show_statistics()
+        statistics = self.get_statistics()
+
+        return statistics
