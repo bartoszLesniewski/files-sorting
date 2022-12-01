@@ -4,6 +4,7 @@ from constans import MAX_BLOCK_SIZE
 
 class DiskOperationsHandler:
     """The class representing a handler of disk operations."""
+
     # static variables common to all objects of this class
     number_of_reads = 0
     number_of_writes = 0
@@ -29,7 +30,6 @@ class DiskOperationsHandler:
         :param tape: Tape on which records are saved.
         :type tape: Tape
         """
-        # read = False
         with open(self.filename, "r") as file:
             file.seek(self.last_position)
             while tape.block.current_size < MAX_BLOCK_SIZE:
@@ -43,20 +43,6 @@ class DiskOperationsHandler:
 
             if self.count:
                 DiskOperationsHandler.number_of_reads += 1
-
-            #     if self.last_position == self.filesize:
-            #         self.eof = True
-            #         break
-            #     else:
-            #         record_line = file.readline()
-            #         record = Record()
-            #         record.deserialize(record_line)
-            #         tape.add_record(record)
-            #         self.last_position = file.tell()
-            #         read = True
-            #
-            # if read:
-            #     DiskOperationsHandler.number_of_reads += 1
 
     def write_block(self, tape):
         """
@@ -94,10 +80,13 @@ class DiskOperationsHandler:
         self.eof = False
         self.last_position = 0
 
-    # @staticmethod
-    # def reset_counters():
-    #     DiskOperationsHandler.number_of_reads = 0
-    #     DiskOperationsHandler.number_of_writes = 0
+    @staticmethod
+    def reset_counters():
+        """
+        Sets the read and write counters to 0.
+        """
+        DiskOperationsHandler.number_of_reads = 0
+        DiskOperationsHandler.number_of_writes = 0
 
     @staticmethod
     def enable_counting():

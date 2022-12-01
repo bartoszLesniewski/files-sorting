@@ -130,13 +130,8 @@ class Record:
         """
         Prints the set of numbers stored in a record.
         """
-        # for number in self.numbers:
-        #     print(number, end=" ")
         for i in range(MAX_RECORD_LENGTH):
             if i < len(self.numbers):
                 print(self.numbers[i], end=" ")
             else:
                 print("None", end=" ")
-
-    # def is_empty(self):
-    #     return len(self.numbers) == 0

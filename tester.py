@@ -16,15 +16,15 @@ def generate_test_files(number_of_tests):
 
 
 def run_tests():
-    for file in os.listdir("tests"):
+    for file in os.listdir("experiment/test_files/"):
         if "result" not in file:
             DiskOperationsHandler.number_of_reads = 0
             DiskOperationsHandler.number_of_writes = 0
-            normal_sorted_records = normal_sorting("tests/" + file)
+            normal_sorted_records = normal_sorting("experiment/test_files/" + file)
             sorter = FileSorter("tests/result_" + file)
             sorter.number_of_records = len(normal_sorted_records)
             sorter.mode = Mode.NON_VERBOSE
-            load_records_from_test_file("tests/" + file, sorter.tape1)
+            load_records_from_test_file("experiment/test_files/" + file, sorter.tape1)
             sorter.natural_merge_sort()
             natural_sorted_records = get_records("tests/result_" + file)
             compare_results(natural_sorted_records, normal_sorted_records, file)

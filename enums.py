@@ -10,7 +10,7 @@ class MainMenuOptions(Enum):
 
 
 class Mode(Enum):
-    """Represents the available message display modes."""
+    """Represents the available file display modes."""
     VERBOSE_RECORDS = 1
     VERBOSE_SUM = 2
     NON_VERBOSE = 3

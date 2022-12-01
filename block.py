@@ -1,4 +1,3 @@
-
 class Block:
     """The class representing a block in which read/written records are stored."""
     def __init__(self):
